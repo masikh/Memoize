@@ -102,7 +102,8 @@ import hashlib
 
 
 class Memoize:
-    """ Example usage:
+    """
+    Example usage:
 
         memoize = Memoize(ttl=300, max_items=100, key_strategy='args')
 
@@ -124,6 +125,7 @@ class Memoize:
     """
 
     def __init__(self, ttl=None, max_items=None, key_strategy=None):
+        """ Set up the memoization parameters used during its live-time """
         self.memoize_cache = {}
         self.ttl = ttl if ttl is not None else 300
         self.max_items = max_items if max_items is not None else 128
@@ -132,6 +134,7 @@ class Memoize:
         self.clear_cache_key = False
 
     def add_cache(self, key, value, ttl):
+        """ Add items to the cache by key and add a ttl """
         self.memoize_cache[key] = (time.time() + ttl, value)
 
     def clean_cache(self):
@@ -147,6 +150,7 @@ class Memoize:
             del self.memoize_cache[key]
 
     def generate_key(self, *args, **kwargs):
+        """ Generate a key for lookup or storing into the cache by key strategy """
         key = None
         cache_control = None
 
@@ -174,13 +178,14 @@ class Memoize:
             key = hashlib.md5(values_string.encode()).hexdigest()
 
         if callable(self._key_strategy):
-            """ Use your own key strategy function. It must return a key and cache_control (None or 'no-cache') """
+            # Use your own key strategy function. It must return a key and cache_control (None or 'no-cache')
             key, cache_control = self._key_strategy()
 
         self.clear_cache_key = False  # Set back to false for next request
         return key, cache_control
 
     def __call__(self, func=None, ttl=None, key_strategy=None):
+        """ Main entry point """
         if func is None:
             return functools.partial(self.__call__, ttl=ttl, key_strategy=key_strategy)
 
